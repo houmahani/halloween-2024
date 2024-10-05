@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { Lightformer, Environment } from '@react-three/drei'
-import Experience from './Experience.jsx'
+import Experience from './Experience/Experience.jsx'
 import './App.css'
 
 function App() {
