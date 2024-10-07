@@ -21,7 +21,7 @@ export const createInitialCards = (cardsCount, horizontalGap, verticalGap) => {
     const y = Math.floor(i / 4) * verticalGap - ((2 - 1) * verticalGap) / 2
 
     cards.push({
-      position: [x, y, 0],
+      position: [x, y, -1],
       color: shuffledColors[i],
       flipped: false,
     })

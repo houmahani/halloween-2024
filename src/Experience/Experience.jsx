@@ -1,5 +1,6 @@
 import { OrbitControls } from '@react-three/drei'
 import MemoryGame from './memoryGame/MemoryGame.jsx'
+import Background from './background/Background.jsx'
 
 export default function Experience() {
   return (
@@ -7,6 +8,8 @@ export default function Experience() {
       <OrbitControls />
 
       <MemoryGame />
+
+      <Background />
     </>
   )
 }
