@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { extend, useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { Html, Float } from '@react-three/drei'
 import { DoubleSide } from 'three'
 import { geometry } from 'maath'
 import {
@@ -41,13 +41,14 @@ export default function MemoryGame() {
     if (flippedCards.length === 1) {
       setHintText('Pick another card to see if they match.')
     } else if (flippedCards.length === 2) {
-      setHintText('You have turned over two cards, checking if they match...')
+      setHintText('Checking if they match...')
 
       const [firstIndex, secondIndex] = flippedCards
 
       if (cardsState[firstIndex].color.equals(cardsState[secondIndex].color)) {
         setTimeout(() => {
           setHintText('Great job! You found a matching pair!')
+
           setFlippedCards([])
 
           setTimeout(() => {
@@ -55,7 +56,9 @@ export default function MemoryGame() {
             if (allMatched) {
               setHintText('Congratulations! You matched all the pairs! 🎉')
             } else {
-              setHintText('Turn over two cards to find more pairs!')
+              setTimeout(() => {
+                setHintText('Turn over two cards to find more pairs!')
+              }, 1000)
             }
           }, 1500)
         }, 500)
@@ -92,26 +95,35 @@ export default function MemoryGame() {
     <>
       {cardsState.map((card, index) => {
         return (
-          <mesh
+          <Float
             key={index}
-            ref={(card) => (cardRefs.current[index] = card)}
-            onClick={() => handleClick(index)}
-            position={card.position}
+            speed={3} // Animation speed, defaults to 1
+            rotationIntensity={0.01} // XYZ rotation intensity, defaults to 1
+            floatIntensity={0.1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
+            floatingRange={[-0.5, 0.5]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
           >
-            <roundedPlaneGeometry args={[1.8, 2.8, 0.1]} />
-            <shaderMaterial
-              vertexShader={cardsVertexShader}
-              fragmentShader={cardsFragmentShader}
-              side={DoubleSide}
-              uniforms={{
-                uColor: { value: card.color },
-              }}
-            />
-          </mesh>
+            <mesh
+              key={index}
+              ref={(card) => (cardRefs.current[index] = card)}
+              onClick={() => handleClick(index)}
+              position={card.position}
+            >
+              <roundedPlaneGeometry args={[1.8, 2.8, 0.1]} />
+              <shaderMaterial
+                vertexShader={cardsVertexShader}
+                fragmentShader={cardsFragmentShader}
+                side={DoubleSide}
+                uniforms={{
+                  uColor: { value: card.color },
+                }}
+              />
+            </mesh>
+          </Float>
         )
       })}
-      <Html center>
-        <p style={{ color: 'black', fontSize: '20px' }}>{hintText}</p>
+
+      <Html as="div" wrapperClass="wrapper__hint">
+        <div className="hint">{hintText}</div>
       </Html>
     </>
   )
