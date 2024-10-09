@@ -85,8 +85,8 @@ export default function MemoryGame() {
   useFrame((state, delta) => {
     cardRefs.current.forEach((ref, i) => {
       if (ref) {
-        const targetRotation = cardsState[i].flipped ? Math.PI : 0 // Target is either 180° or 0°
-        ref.rotation.y += (targetRotation - ref.rotation.y) * delta * 4 // Smooth interpolation to target rotation
+        const targetRotation = cardsState[i].flipped ? Math.PI : 0
+        ref.rotation.y += (targetRotation - ref.rotation.y) * delta * 4
       }
     })
   })
@@ -97,10 +97,10 @@ export default function MemoryGame() {
         return (
           <Float
             key={index}
-            speed={3} // Animation speed, defaults to 1
-            rotationIntensity={0.01} // XYZ rotation intensity, defaults to 1
-            floatIntensity={0.1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-            floatingRange={[-0.5, 0.5]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+            speed={3}
+            rotationIntensity={0.01}
+            floatIntensity={0.1}
+            floatingRange={[-0.5, 0.5]}
           >
             <mesh
               key={index}
