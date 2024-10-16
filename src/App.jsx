@@ -7,21 +7,22 @@ import './App.css'
 
 function App() {
   const { canvasColor } = useControls('Canvas Background', {
-    canvasColor: '#233f5b',
+    canvasColor: '#15021d',
   })
 
   const { fogColor } = useControls('Fog Color', {
-    fogColor: '#233f5b',
+    fogColor: '#000810',
   })
 
   return (
     <>
-      <Leva />
+      <Leva flat />
       <Canvas>
         <color attach="background" args={[canvasColor]} />
-        <fog attach="fog" args={[fogColor, 0, 20]} />
+
         <Environment preset="dawn" />
         <Experience />
+        {/* <fog attach="fog" args={[fogColor, 0, 50]} /> */}
       </Canvas>
     </>
   )
