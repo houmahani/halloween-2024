@@ -12,21 +12,23 @@ import {
   Vector2,
 } from 'three'
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
-import fogVertexShader from '../materials/shaders/fog2/vertex.glsl'
-import fogFragmentShader from '../materials/shaders/fog2/fragment.glsl'
+import fogVertexShader from '../materials/shaders/fog/vertex.glsl'
+import fogFragmentShader from '../materials/shaders/fog/fragment.glsl'
 import cloudsVertexShader from '../materials/shaders/clouds/vertex.glsl'
 import cloudsFragmentShader from '../materials/shaders/clouds/fragment.glsl'
+import floorVertexShader from '../materials/shaders/floor/vertex.glsl'
+import floorFragmentShader from '../materials/shaders/floor/fragment.glsl'
 
 export default function Background() {
   const fogMeshRef = useRef()
+  const fogMaterialRef = useRef()
   const cloudsMeshRef = useRef()
   const cloudsMaterialRef = useRef()
   const { width, height } = useThree((state) => state.viewport)
   const { size } = useThree()
-  console.log(size)
 
   const { color } = useControls('floorColor', {
-    color: '#0d1421',
+    color: '#353b6c',
   })
 
   const { moonColor, moonEmissive, moonEmissiveIntensity, moonPosition } =
@@ -34,7 +36,7 @@ export default function Background() {
       moonColor: '#ffffff',
       moonEmissive: '#ffff00',
       moonEmissiveIntensity: 0.5,
-      moonPosition: { x: 10, y: 10, z: -25 },
+      moonPosition: { x: 10, y: 12, z: -25 },
     })
 
   const {
@@ -45,24 +47,22 @@ export default function Background() {
     cloudsColor4,
   } = useControls('clouds', {
     cloudsPosition: { x: 0, y: 11, z: -15 },
-    cloudsColor1: '#d37a15',
-    cloudsColor2: '#da2e6a',
-    cloudsColor3: '#0f6dfa',
-    cloudsColor4: '#11d0de',
+    cloudsColor1: '#dba9ff',
+    cloudsColor2: '#c0d4eb',
+    cloudsColor3: '#6e56d0',
+    cloudsColor4: '#8cadd5',
   })
 
   const perlinTexture = useLoader(TextureLoader, '/fog-noise.png')
-  perlinTexture.wrapS = RepeatWrapping
-  perlinTexture.wrapT = RepeatWrapping
 
   useFrame((state, delta) => {
     // if (pointLightRef1.current) {
     //   pointLightRef1.current.position.y = Math.sin(Date.now() * 0.001) * 0.2 + 2 // Small subtle movement for mood
     // }
-    if (cloudsMaterialRef.current) {
-      console.log(cloudsMaterialRef.current)
 
-      cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.2
+    // fogMaterialRef.current.uniforms.uTime.value += delta * 0.02
+    if (cloudsMaterialRef.current) {
+      cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
 
       cloudsMaterialRef.current.uniforms.uCloudColor1.value.set(cloudsColor1) // Update unif
       cloudsMaterialRef.current.uniforms.uCloudColor2.value.set(cloudsColor2) // Update uniform color every frame
@@ -100,7 +100,7 @@ export default function Background() {
     <>
       {/* Moon */}
       <mesh position={[moonPosition.x, moonPosition.y, moonPosition.z]}>
-        <sphereGeometry args={[10, 64, 64]} />
+        <circleGeometry args={[8, 64, 64]} />
         {/* Radius, width segments, height segments */}
         <meshStandardMaterial
           color={moonColor}
@@ -110,17 +110,26 @@ export default function Background() {
       </mesh>
 
       {/* Floor */}
-      <mesh position={[0, -3, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[width * 4, 30]} />
+      <mesh position={[0, -3.9, -5]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[width * 4, 18, 100, 100]} />
+        {/* <shaderMaterial
+          vertexShader={floorVertexShader}
+          fragmentShader={floorFragmentShader}
+          uniforms={{
+            uFrequency: { value: 0.1 },
+            uAmplitude: { value: 1 },
+            uFloorColor: { value: new Color(color) },
+          }}
+        />*/}
         <MeshReflectorMaterial
-          blur={[400, 100]}
+          blur={[400, 1000]}
           resolution={1024}
           mixBlur={1}
-          mixStrength={15}
+          mixStrength={5}
           depthScale={1}
           minDepthThreshold={0.85}
           color={color}
-          metalness={0.6}
+          metalness={0.5}
           roughness={1}
         />
       </mesh>
@@ -165,20 +174,21 @@ export default function Background() {
         />
       </mesh> */}
 
-      {/* Fog foregound */}
-      {/* <mesh ref={fogMeshRef} position={(0, 0, 0)}>
+      {/* Custom Fog foregound */}
+      <mesh ref={fogMeshRef} position={(0, 0, 0)}>
         <planeGeometry args={[width, height]} />
         <shaderMaterial
+          ref={fogMaterialRef}
+          transparent={true}
           vertexShader={fogVertexShader}
           fragmentShader={fogFragmentShader}
-          side={DoubleSide}
-          transparent={true}
           uniforms={{
             uTime: { value: 0 },
             uPerlinTexture: { value: perlinTexture },
+            uFogColor: { value: new Color('#422250') },
           }}
         />
-      </mesh> */}
+      </mesh>
     </>
   )
 }

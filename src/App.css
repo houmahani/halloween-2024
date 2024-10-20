@@ -29,3 +29,7 @@ body,
   color: #0b0429;
   pointer-events: none;
 }
+
+canvas {
+  background: linear-gradient(to bottom, #547bc1 0%, #111535 50%, #030a25 100%);
+}

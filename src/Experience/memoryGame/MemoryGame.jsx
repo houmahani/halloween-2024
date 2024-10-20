@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { extend, useFrame } from '@react-three/fiber'
+import { extend, useFrame, useLoader } from '@react-three/fiber'
 import { Html, Float } from '@react-three/drei'
-import { DoubleSide } from 'three'
+import { Color, DoubleSide, RepeatWrapping } from 'three'
 import { geometry } from 'maath'
+import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import {
   cardsCount,
   horizontalGap,
@@ -16,8 +17,13 @@ extend(geometry)
 
 export default function MemoryGame() {
   const cardRefs = useRef([])
+  const cardMaterialRefs = useRef([])
   const [flippedCards, setFlippedCards] = useState([])
   const [hintText, setHintText] = useState('Turn over two cards to find pairs!')
+
+  const pumpkinsTexture = useLoader(TextureLoader, '/pumpkins.png')
+  pumpkinsTexture.wrapS = RepeatWrapping
+  pumpkinsTexture.wrapT = RepeatWrapping
 
   const [cardsState, setCardsState] = useState(() =>
     createInitialCards(cardsCount, horizontalGap, verticalGap)
@@ -89,15 +95,25 @@ export default function MemoryGame() {
         ref.rotation.y += (targetRotation - ref.rotation.y) * delta * 4
       }
     })
+
+    cardMaterialRefs.current.forEach((ref, i) => {
+      if (ref) {
+        ref.uniforms.uTime.value += delta
+      }
+    })
   })
 
   return (
     <>
       {cardsState.map((card, index) => {
+        console.log(
+          `Card ${index}: xOffset=${card.offset[0]}, yOffset=${card.offset[1]}`
+        )
+
         return (
           <Float
             key={index}
-            speed={3}
+            speed={0}
             rotationIntensity={0.01}
             floatIntensity={0.1}
             floatingRange={[-0.5, 0.5]}
@@ -108,13 +124,21 @@ export default function MemoryGame() {
               onClick={() => handleClick(index)}
               position={card.position}
             >
-              <roundedPlaneGeometry args={[1.8, 2.8, 0.1]} />
+              <roundedPlaneGeometry args={[1.2, 2, 0.1]} />
               <shaderMaterial
+                ref={(card) => (cardMaterialRefs.current[index] = card)}
                 vertexShader={cardsVertexShader}
                 fragmentShader={cardsFragmentShader}
                 side={DoubleSide}
+                transparent={true}
                 uniforms={{
                   uColor: { value: card.color },
+                  uBackColor: { value: new Color('#3a3049') },
+                  uLineColor: { value: new Color('#e46b00') },
+                  uPumpkinsTexture: { value: pumpkinsTexture },
+                  uXOffset: { value: card.offset[0] },
+                  uYOffset: { value: card.offset[1] },
+                  uTime: { value: 0 },
                 }}
               />
             </mesh>

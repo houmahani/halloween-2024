@@ -64,7 +64,7 @@ float contrastDensity = smoothstep(1.0, 0.2, fbmDensity);
 
 
 // float smoothEdgeX = smoothstep(0.0, 0.1, vUv.x) * (1.0 - smoothstep(0.9, 1.0, vUv.x));
-float smoothEdgeY = smoothstep(0.8, 0.1, vUv.y) * (1.0 - smoothstep(0.9, 1.0, vUv.y));
+float smoothEdgeY = smoothstep(-0.2, 0.5, vUv.y) * (1.0 - smoothstep(0.6, 1.0, vUv.y));
 float edge =  smoothEdgeY;
 
 color = mix(uCloudColor1,

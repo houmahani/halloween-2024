@@ -117,7 +117,7 @@ export default function Experience() {
       {/* Optional: Add Ambient Light for Some Global Lighting */}
       <ambientLight intensity={10.3} color="#ffffff" />
 
-      {/* <MemoryGame /> */}
+      <MemoryGame />
 
       {/* <primitive
         position={[-4.5, -3, 0]}
@@ -145,26 +145,26 @@ export default function Experience() {
         object={fourthClone}
         scale={[1, 1, 1]}
         rotation={[0, -1.5, 0]}
-      />
+      /> */}
 
-      <primitive
+      {/* <primitive
         position={[-3, -2, 3]}
         object={treeClone}
         scale={[1.5, 1.5, 1.5]}
         rotation={[0, -1.5, 0]}
-      />
-      <primitive
+      /> */}
+      {/* <primitive
         position={[8, -5, -3]}
         object={secondTreeClone}
         scale={[2, 2, 2]}
         rotation={[0, -1.5, 0]}
-      />
+      /> */}
 
-      <primitive
-        position={[-10, -3, -5]}
+      {/* <primitive
+        position={[5, -3, -5]}
         object={houseClone}
-        scale={[1.5, 1.5, 1.5]}
-        rotation={[0, 1, 0]}
+        scale={[1, 1, 1]}
+        rotation={[0, 0, 0]}
       /> */}
       <Background />
     </>

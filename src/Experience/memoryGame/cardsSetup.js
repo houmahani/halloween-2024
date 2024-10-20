@@ -1,8 +1,8 @@
 import { Color } from 'three'
 
 export const cardsCount = 8
-export const horizontalGap = 2
-export const verticalGap = 3
+export const horizontalGap = 1.5
+export const verticalGap = 2.4
 
 // Function to create initial card data
 export const createInitialCards = (cardsCount, horizontalGap, verticalGap) => {
@@ -20,10 +20,14 @@ export const createInitialCards = (cardsCount, horizontalGap, verticalGap) => {
     const x = (i % 4) * horizontalGap - ((4 - 1) * horizontalGap) / 2
     const y = Math.floor(i / 4) * verticalGap - ((2 - 1) * verticalGap) / 2
 
+    const xOffset = (x + ((4 - 1) * horizontalGap) / 2) / (4 * horizontalGap)
+    const yOffset = (y + ((2 - 1) * verticalGap) / 2) / (2 * verticalGap)
+
     cards.push({
-      position: [x, y, -1],
+      position: [x, y, 0.8],
       color: shuffledColors[i],
       flipped: false,
+      offset: [xOffset, yOffset],
     })
   }
 
