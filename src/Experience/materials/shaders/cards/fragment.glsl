@@ -2,9 +2,10 @@ uniform vec3 uColor;
 uniform vec3 uBackColor;
 uniform vec3 uLineColor;
 uniform float uTime;
-uniform sampler2D uPumpkinsTexture;
 uniform float uXOffset;
 uniform float uYOffset;
+uniform sampler2D uPumpkinsTexture;
+
 varying vec2 vUv;
 
 void main() {
@@ -12,26 +13,25 @@ void main() {
   vUvCustom.x = vUvCustom.x * 0.25 + uXOffset;
   vUvCustom.y = vUvCustom.y * 0.5 + uYOffset;
 
- float glowStart = vUvCustom.x + uTime * 1.0 - 1.2;
-float glowEnd = vUvCustom.x + uTime * 1.0 + 1.2;
+  float pumpkinsTexture = texture(uPumpkinsTexture, vUvCustom).r;
 
-float glowIntensity = smoothstep(glowStart, glowEnd, vUvCustom.x);
+  bool isLine = pumpkinsTexture < 0.5;
 
- float pumpkinsTexture = texture(uPumpkinsTexture, vUvCustom).r;
+  // Calculate glow animation with unique speed factor and direction per card
+  float glowCenter = mod(vUvCustom.x + uTime * 0.2 * 0.8, 1.0);
+  float glowWidth = 0.05;
+  float glowIntensity = smoothstep(glowCenter - glowWidth, glowCenter + glowWidth, pumpkinsTexture);
 
-// float glowIntensity = (sin(uTime) + 1.0) * 0.5;
-vec3 glow = uLineColor * glowIntensity;
-
- bool isLine = pumpkinsTexture < 0.8;
 
   if (gl_FrontFacing) {
     if(isLine) {
-      gl_FragColor = vec4(glow, 1.0);
+      // gl_FragColor = vec4(uLineColor * glowIntensity, 1.0);
+      gl_FragColor = vec4(uLineColor * glowIntensity, 1.0);
     } else {
       gl_FragColor = vec4(uBackColor, 1.0);
     }
- // Red for the front
+
   } else {
-    gl_FragColor = vec4(uColor, 1.0); // Pink for the back
+    gl_FragColor = vec4(uColor, 1.0);
   }
 }
