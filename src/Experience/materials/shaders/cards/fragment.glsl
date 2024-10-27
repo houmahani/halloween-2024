@@ -15,23 +15,29 @@ void main() {
 
   float pumpkinsTexture = texture(uPumpkinsTexture, vUvCustom).r;
 
-  bool isLine = pumpkinsTexture < 0.5;
+  bool isLine = pumpkinsTexture < 0.3;
 
   // Calculate glow animation with unique speed factor and direction per card
-  float glowCenter = mod(vUvCustom.x + uTime * 0.2 * 0.8, 1.0);
-  float glowWidth = 0.05;
-  float glowIntensity = smoothstep(glowCenter - glowWidth, glowCenter + glowWidth, pumpkinsTexture);
+  float glowCenter = mod(vUvCustom.x + uTime * 0.2 * 1.0, 1.0);
+float glowWidth = 1.0; // Reduced width for a thicker line
+float glowIntensity = smoothstep(glowCenter - glowWidth * 0.5, glowCenter + glowWidth * 0.5, pumpkinsTexture);
+
 
 
   if (gl_FrontFacing) {
     if(isLine) {
       // gl_FragColor = vec4(uLineColor * glowIntensity, 1.0);
-      gl_FragColor = vec4(uLineColor * glowIntensity, 1.0);
+      gl_FragColor = vec4(uLineColor, 1.0);
     } else {
       gl_FragColor = vec4(uBackColor, 1.0);
     }
 
+// gl_FragColor = vec4(uBackColor, 1.0);
+    // gl_FragColor = vec4(uColor, 1.0);
+
   } else {
-    gl_FragColor = vec4(uColor, 1.0);
+    // gl_FragColor = vec4(uColor, 1.0);
   }
+//  gl_FragColor = vec4(uBackColor, 1.0);
+
 }

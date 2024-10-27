@@ -16,8 +16,8 @@ import fogVertexShader from '../materials/shaders/fog/vertex.glsl'
 import fogFragmentShader from '../materials/shaders/fog/fragment.glsl'
 import cloudsVertexShader from '../materials/shaders/clouds/vertex.glsl'
 import cloudsFragmentShader from '../materials/shaders/clouds/fragment.glsl'
-import floorVertexShader from '../materials/shaders/floor/vertex.glsl'
-import floorFragmentShader from '../materials/shaders/floor/fragment.glsl'
+import Bats from '../Bats.jsx'
+import ParticlesFlow from './ParticlesFlow.jsx'
 
 export default function Background() {
   const fogMeshRef = useRef()
@@ -56,51 +56,16 @@ export default function Background() {
   const perlinTexture = useLoader(TextureLoader, '/fog-noise.png')
 
   useFrame((state, delta) => {
-    // if (pointLightRef1.current) {
-    //   pointLightRef1.current.position.y = Math.sin(Date.now() * 0.001) * 0.2 + 2 // Small subtle movement for mood
-    // }
-
-    // fogMaterialRef.current.uniforms.uTime.value += delta * 0.02
     if (cloudsMaterialRef.current) {
       cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
-
-      cloudsMaterialRef.current.uniforms.uCloudColor1.value.set(cloudsColor1) // Update unif
-      cloudsMaterialRef.current.uniforms.uCloudColor2.value.set(cloudsColor2) // Update uniform color every frame
-      cloudsMaterialRef.current.uniforms.uCloudColor3.value.set(cloudsColor3) // Update uniform color every frame
-      cloudsMaterialRef.current.uniforms.uCloudColor4.value.set(cloudsColor4) // Update uniform color every frame
     }
   })
-
-  // Create the shape with a circular hole
-  const createUShape = () => {
-    const shape = new Shape()
-    const shapeWidth = width * 4 // Width of the base rectangle
-    const shapeHeight = height * 2.9 // Height of the base rectangle
-
-    // Define base rectangle shape
-    shape.moveTo(-shapeWidth / 2, -shapeHeight / 2)
-    shape.lineTo(shapeWidth / 2, -shapeHeight / 2)
-    shape.lineTo(shapeWidth / 2, shapeHeight / 2)
-    shape.lineTo(-shapeWidth / 2, shapeHeight / 2)
-    shape.lineTo(-shapeWidth / 2, -shapeHeight / 2)
-
-    // Define the hole (circle) in the middle
-    const hole = new Path()
-    const holeRadius = 10
-
-    hole.absellipse(0, 11, holeRadius, holeRadius, 0, Math.PI * 2, false)
-    shape.holes.push(hole)
-
-    return shape
-  }
-
-  const uShape = createUShape()
 
   return (
     <>
       {/* Moon */}
       <mesh position={[moonPosition.x, moonPosition.y, moonPosition.z]}>
-        <circleGeometry args={[8, 64, 64]} />
+        <circleGeometry args={[15, 64, 64]} />
         {/* Radius, width segments, height segments */}
         <meshStandardMaterial
           color={moonColor}
@@ -110,8 +75,8 @@ export default function Background() {
       </mesh>
 
       {/* Floor */}
-      <mesh position={[0, -3.9, -5]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[width * 4, 18, 100, 100]} />
+      <mesh position={[0, -4, -5]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[width * 4, 20, 100, 100]} />
         {/* <shaderMaterial
           vertexShader={floorVertexShader}
           fragmentShader={floorFragmentShader}
@@ -158,6 +123,8 @@ export default function Background() {
         />
       </mesh>
 
+      {/* <Bats /> */}
+
       {/* Fog behind */}
       {/* <mesh ref={fogMeshRef} position={(0, 0, -5)}>
         <planeGeometry args={[width * 5, height * 4]} />
@@ -185,10 +152,12 @@ export default function Background() {
           uniforms={{
             uTime: { value: 0 },
             uPerlinTexture: { value: perlinTexture },
-            uFogColor: { value: new Color('#422250') },
+            uFogColor: { value: new Color('#4d2c59') },
           }}
         />
       </mesh>
+
+      <ParticlesFlow />
     </>
   )
 }

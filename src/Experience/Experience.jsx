@@ -60,7 +60,7 @@ export default function Experience() {
   const secondTreeClone = clone(secondTreeGltf.scene)
   secondTreeClone.traverse((child) => {
     if (child.isMesh) {
-      child.material = new MeshBasicMaterial({ color: 0x000000 })
+      child.material = new MeshStandardMaterial({ color: 0x000000 })
     }
   })
 
@@ -115,11 +115,11 @@ export default function Experience() {
         castShadow
       /> */}
       {/* Optional: Add Ambient Light for Some Global Lighting */}
-      <ambientLight intensity={10.3} color="#ffffff" />
+      <ambientLight intensity={15.3} color="#ffffff" />
 
       <MemoryGame />
-
-      {/* <primitive
+      {/* 
+      <primitive
         position={[-4.5, -3, 0]}
         object={firstClone}
         scale={[1.5, 1.5, 1.5]}
@@ -145,25 +145,25 @@ export default function Experience() {
         object={fourthClone}
         scale={[1, 1, 1]}
         rotation={[0, -1.5, 0]}
-      /> */}
-
-      {/* <primitive
+      />
+*/}
+      <primitive
         position={[-3, -2, 3]}
         object={treeClone}
         scale={[1.5, 1.5, 1.5]}
-        rotation={[0, -1.5, 0]}
-      /> */}
-      {/* <primitive
-        position={[8, -5, -3]}
+        rotation={[0, 0, 0]}
+      />
+      <primitive
+        position={[17, -4, -18]}
         object={secondTreeClone}
-        scale={[2, 2, 2]}
-        rotation={[0, -1.5, 0]}
-      /> */}
+        scale={[3, 3, 3]}
+        rotation={[0, 0, 0]}
+      />
 
       {/* <primitive
-        position={[5, -3, -5]}
+        position={[15, -3, -18]}
         object={houseClone}
-        scale={[1, 1, 1]}
+        scale={[2.5, 2.5, 2.5]}
         rotation={[0, 0, 0]}
       /> */}
       <Background />

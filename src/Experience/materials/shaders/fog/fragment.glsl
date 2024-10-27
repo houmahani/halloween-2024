@@ -9,6 +9,6 @@ void main() {
     float alphaTop = smoothstep(0.2, 0.5, vUv.y ); 
     float alphaBottom = 1.0 - smoothstep(0.4, 0.8, vUv.y);
 
-    float alpha = alphaTop * alphaBottom * fog ;
+    float alpha = alphaTop * alphaBottom * fog * 10.0;
     gl_FragColor = vec4(uFogColor, fog);
 }

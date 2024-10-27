@@ -1,7 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { extend, useFrame, useLoader } from '@react-three/fiber'
-import { Html, Float } from '@react-three/drei'
-import { Color, DoubleSide, RepeatWrapping } from 'three'
+import { Html, Float, MeshPortalMaterial } from '@react-three/drei'
+import {
+  BackSide,
+  Color,
+  DoubleSide,
+  FrontSide,
+  RepeatWrapping,
+  Vector2,
+} from 'three'
 import { geometry } from 'maath'
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import {
@@ -12,6 +19,8 @@ import {
 } from './cardsSetup'
 import cardsVertexShader from '../materials/shaders/cards/vertex.glsl'
 import cardsFragmentShader from '../materials/shaders/cards/fragment.glsl'
+import PumpkinScene from '../scenes/PumpkinScene.jsx'
+import { useMatchedElements } from '../MatchedElementsContext.jsx'
 
 extend(geometry)
 
@@ -20,6 +29,7 @@ export default function MemoryGame() {
   const cardMaterialRefs = useRef([])
   const [flippedCards, setFlippedCards] = useState([])
   const [hintText, setHintText] = useState('Turn over two cards to find pairs!')
+  const { matchedElements, addMatchedElement } = useMatchedElements()
 
   const pumpkinsTexture = useLoader(TextureLoader, '/pumpkins.png')
   pumpkinsTexture.wrapS = RepeatWrapping
@@ -51,11 +61,15 @@ export default function MemoryGame() {
 
       const [firstIndex, secondIndex] = flippedCards
 
-      if (cardsState[firstIndex].color.equals(cardsState[secondIndex].color)) {
+      if (
+        cardsState[firstIndex].element.name ===
+        cardsState[secondIndex].element.name
+      ) {
         setTimeout(() => {
           setHintText('Great job! You found a matching pair!')
-
           setFlippedCards([])
+
+          addMatchedElement(cardsState[firstIndex].element.name)
 
           setTimeout(() => {
             const allMatched = cardsState.every((card) => card.flipped)
@@ -106,42 +120,60 @@ export default function MemoryGame() {
   return (
     <>
       {cardsState.map((card, index) => {
-        console.log(
-          `Card ${index}: xOffset=${card.offset[0]}, yOffset=${card.offset[1]}`
-        )
+        const PortalSceneComponent = card.element.scene
 
         return (
           <Float
             key={index}
-            speed={0}
+            speed={1}
             rotationIntensity={0.01}
             floatIntensity={0.1}
             floatingRange={[-0.5, 0.5]}
           >
-            <mesh
+            <group
               key={index}
               ref={(card) => (cardRefs.current[index] = card)}
-              onClick={() => handleClick(index)}
               position={card.position}
+              onClick={() => handleClick(index)}
             >
-              <roundedPlaneGeometry args={[1.2, 2, 0.1]} />
-              <shaderMaterial
-                ref={(card) => (cardMaterialRefs.current[index] = card)}
-                vertexShader={cardsVertexShader}
-                fragmentShader={cardsFragmentShader}
-                side={DoubleSide}
-                transparent={true}
-                uniforms={{
-                  uColor: { value: card.color },
-                  uBackColor: { value: new Color('#3a3049') },
-                  uLineColor: { value: new Color('#e46b00') },
-                  uPumpkinsTexture: { value: pumpkinsTexture },
-                  uXOffset: { value: card.offset[0] },
-                  uYOffset: { value: card.offset[1] },
-                  uTime: { value: 0 },
-                }}
-              />
-            </mesh>
+              <mesh>
+                <roundedPlaneGeometry args={[1.2, 2, 0.1]} />
+
+                {/* Front side - Portal Material */}
+                <MeshPortalMaterial side={BackSide} attachArray="material">
+                  {/* This will be the content of your portal */}
+                  <PortalSceneComponent matchedElements={matchedElements} />
+                </MeshPortalMaterial>
+              </mesh>
+
+              <mesh>
+                <roundedPlaneGeometry args={[1.2, 2, 0.1]} />
+
+                {/* Back side - Simple Red Material */}
+                <shaderMaterial
+                  attachArray="material"
+                  ref={(card) => (cardMaterialRefs.current[index] = card)}
+                  vertexShader={cardsVertexShader}
+                  fragmentShader={cardsFragmentShader}
+                  side={FrontSide}
+                  transparent={false}
+                  uniforms={{
+                    uColor: { value: card.color },
+                    uBackColor: { value: new Color('#351861') },
+                    uLineColor: { value: new Color('#e46b00') },
+                    uPumpkinsTexture: { value: pumpkinsTexture },
+                    uXOffset: { value: card.offset[0] },
+                    uYOffset: { value: card.offset[1] },
+                    uTime: { value: 0 },
+                    uStartOffset: { value: Math.random() },
+                    uDirection: { value: Math.random() > 0.5 ? 1.0 : -1.0 },
+                    uGlowCenter: { value: new Vector2(0.5, 0.5) },
+                    uGlowRadius: { value: 2.0 },
+                    uGlowIntensity: { value: 2.0 },
+                  }}
+                />
+              </mesh>
+            </group>
           </Float>
         )
       })}
