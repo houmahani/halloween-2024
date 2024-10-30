@@ -20,6 +20,8 @@ import { useMatchedElements } from '../MatchedElementsContext.jsx'
 
 export default function Background() {
   const emissiveObjectRef = useRef([])
+  const foregroundTreeRef = useRef()
+  const backgroundTreeRef = useRef()
   const { width, height } = useThree((state) => state.viewport)
   const { matchedElements, audioTriggered } = useMatchedElements()
   const fogMaterialRef = useRef()
@@ -75,7 +77,7 @@ export default function Background() {
   })
 
   // Handle opacity in the `useFrame` loop
-  useFrame((_state, delta) => {
+  useFrame((state, delta) => {
     if (cloudsMaterialRef.current) {
       cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
     }
@@ -86,6 +88,16 @@ export default function Background() {
           material.opacity += delta * 0.5 // Increase opacity gradually
         }
       })
+    }
+
+    if (foregroundTreeRef.current) {
+      const sway = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.05
+      foregroundTreeRef.current.rotation.z = sway
+    }
+
+    if (backgroundTreeRef.current) {
+      const sway = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.05
+      backgroundTreeRef.current.rotation.z = sway
     }
   })
 
@@ -167,12 +179,14 @@ export default function Background() {
       <ParticlesFlow />
 
       <primitive
+        ref={foregroundTreeRef}
         position={[-3, -2, 3]}
         object={treeClone}
         scale={[1.5, 1.5, 1.5]}
         rotation={[0, 0, 0]}
       />
       <primitive
+        ref={backgroundTreeRef}
         position={[17, -4, -18]}
         object={secondTreeClone}
         scale={[3, 3, 3]}
