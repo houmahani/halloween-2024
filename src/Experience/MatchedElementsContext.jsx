@@ -1,13 +1,11 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
-// Create context
 const MatchedElementsContext = createContext()
 
-// Provider component
 export const MatchedElementsProvider = ({ children }) => {
   const [matchedElements, setMatchedElements] = useState([])
+  const [audioTriggered, setAudioTriggered] = useState(false)
 
-  // Function to add a new matched element
   const addMatchedElement = (element) => {
     setMatchedElements((prev) => {
       if (!prev.includes(element)) {
@@ -17,14 +15,28 @@ export const MatchedElementsProvider = ({ children }) => {
     })
   }
 
+  useEffect(() => {
+    const handleClick = () => {
+      setAudioTriggered(true)
+    }
+
+    document.addEventListener('click', handleClick)
+
+    return () => document.removeEventListener('click', handleClick)
+  }, [audioTriggered])
+
   return (
     <MatchedElementsContext.Provider
-      value={{ matchedElements, addMatchedElement }}
+      value={{
+        matchedElements,
+        addMatchedElement,
+        audioTriggered,
+        setAudioTriggered,
+      }}
     >
       {children}
     </MatchedElementsContext.Provider>
   )
 }
 
-// Custom hook to consume the context
 export const useMatchedElements = () => useContext(MatchedElementsContext)

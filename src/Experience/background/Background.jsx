@@ -1,91 +1,108 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
-import { MeshReflectorMaterial } from '@react-three/drei'
-import { useControls } from 'leva'
+import { MeshReflectorMaterial, PositionalAudio } from '@react-three/drei'
+import { GLTFLoader } from 'three/examples/jsm/Addons.js'
 import {
   Color,
   DoubleSide,
-  Path,
-  RepeatWrapping,
-  Shape,
-  ShapeGeometry,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
   Vector2,
 } from 'three'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import fogVertexShader from '../materials/shaders/fog/vertex.glsl'
 import fogFragmentShader from '../materials/shaders/fog/fragment.glsl'
 import cloudsVertexShader from '../materials/shaders/clouds/vertex.glsl'
 import cloudsFragmentShader from '../materials/shaders/clouds/fragment.glsl'
-import Bats from '../Bats.jsx'
 import ParticlesFlow from './ParticlesFlow.jsx'
+import { useMatchedElements } from '../MatchedElementsContext.jsx'
 
 export default function Background() {
-  const fogMeshRef = useRef()
-  const fogMaterialRef = useRef()
-  const cloudsMeshRef = useRef()
-  const cloudsMaterialRef = useRef()
+  const emissiveObjectRef = useRef([])
   const { width, height } = useThree((state) => state.viewport)
-  const { size } = useThree()
+  const { matchedElements, audioTriggered } = useMatchedElements()
+  const fogMaterialRef = useRef()
+  const cloudsMaterialRef = useRef()
 
-  const { color } = useControls('floorColor', {
-    color: '#353b6c',
+  const perlinTexture = useLoader(TextureLoader, '/textures/fog-noise.png')
+  const treeGltf = useLoader(GLTFLoader, '/models/tree.glb')
+  const house = useLoader(GLTFLoader, '/models/house.glb')
+
+  const treeClone = clone(treeGltf.scene)
+  treeClone.traverse((child) => {
+    if (child.isMesh) {
+      child.material = new MeshStandardMaterial({ color: 0x000000 })
+    }
   })
 
-  const { moonColor, moonEmissive, moonEmissiveIntensity, moonPosition } =
-    useControls('moon', {
-      moonColor: '#ffffff',
-      moonEmissive: '#ffff00',
-      moonEmissiveIntensity: 0.5,
-      moonPosition: { x: 10, y: 12, z: -25 },
-    })
+  const secondTreeClone = clone(treeGltf.scene)
+  secondTreeClone.traverse((child) => {
+    if (child.isMesh) {
+      child.material = new MeshStandardMaterial({ color: 0x000000 })
+    }
+  })
+  // Clone the house object
+  const houseClone = clone(house.scene)
+  emissiveObjectRef.current = [] // Initialize the array only once, outside of traverse
 
-  const {
-    cloudsPosition,
-    cloudsColor1,
-    cloudsColor2,
-    cloudsColor3,
-    cloudsColor4,
-  } = useControls('clouds', {
-    cloudsPosition: { x: 0, y: 11, z: -15 },
-    cloudsColor1: '#dba9ff',
-    cloudsColor2: '#c0d4eb',
-    cloudsColor3: '#6e56d0',
-    cloudsColor4: '#8cadd5',
+  // Traverse through the clone
+  houseClone.traverse((child) => {
+    if (child.children.length > 0) {
+      const houseMesh = child.children[0]
+
+      if (houseMesh.children.length > 0) {
+        const emissiveChild = houseMesh.children[0]
+
+        // Set the emissive material on the target child
+        emissiveChild.material = new MeshStandardMaterial({
+          color: '#ffd900',
+          emissive: '#ffd900',
+          emissiveIntensity: 2,
+          transparent: true,
+          opacity: 0,
+          side: DoubleSide,
+        })
+
+        emissiveChild.material.needsUpdate = true
+
+        // Add the material reference to the array if it’s not already there
+        if (!emissiveObjectRef.current.includes(emissiveChild.material)) {
+          emissiveObjectRef.current.push(emissiveChild.material)
+        }
+      }
+    }
   })
 
-  const perlinTexture = useLoader(TextureLoader, '/fog-noise.png')
-
-  useFrame((state, delta) => {
+  // Handle opacity in the `useFrame` loop
+  useFrame((_state, delta) => {
     if (cloudsMaterialRef.current) {
       cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
+    }
+
+    if (matchedElements.includes('candle')) {
+      emissiveObjectRef.current.forEach((material) => {
+        if (material.opacity < 1) {
+          material.opacity += delta * 0.5 // Increase opacity gradually
+        }
+      })
     }
   })
 
   return (
     <>
-      {/* Moon */}
-      <mesh position={[moonPosition.x, moonPosition.y, moonPosition.z]}>
-        <circleGeometry args={[15, 64, 64]} />
-        {/* Radius, width segments, height segments */}
-        <meshStandardMaterial
-          color={moonColor}
-          emissive={moonEmissive} // Makes the moon look like it's glowing
-          emissiveIntensity={moonEmissiveIntensity}
+      {audioTriggered && (
+        <PositionalAudio
+          autoplay
+          loop
+          url="/sounds/ambience.mp3"
+          distance={0.8}
         />
-      </mesh>
+      )}
 
       {/* Floor */}
       <mesh position={[0, -4, -5]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[width * 4, 20, 100, 100]} />
-        {/* <shaderMaterial
-          vertexShader={floorVertexShader}
-          fragmentShader={floorFragmentShader}
-          uniforms={{
-            uFrequency: { value: 0.1 },
-            uAmplitude: { value: 1 },
-            uFloorColor: { value: new Color(color) },
-          }}
-        />*/}
         <MeshReflectorMaterial
           blur={[400, 1000]}
           resolution={1024}
@@ -93,56 +110,46 @@ export default function Background() {
           mixStrength={5}
           depthScale={1}
           minDepthThreshold={0.85}
-          color={color}
+          color={0x353b6c}
           metalness={0.5}
           roughness={1}
         />
       </mesh>
 
+      {/* Moon */}
+      <mesh position={[10, 12, -25]}>
+        <circleGeometry args={[15, 64, 64]} />
+        {/* Radius, width segments, height segments */}
+        <meshStandardMaterial
+          color={0xffffff}
+          emissive={0xffff00} // Makes the moon look like it's glowing
+          emissiveIntensity={0.5}
+        />
+      </mesh>
+
       {/* Clouds */}
-      <mesh
-        ref={cloudsMeshRef}
-        position={[cloudsPosition.x, cloudsPosition.y, cloudsPosition.z]}
-      >
+      <mesh position={[0, 11, -15]}>
         <planeGeometry args={[width * 4, 30]} />
-        {/* <primitive object={new ShapeGeometry(uShape)} /> */}
         <shaderMaterial
           ref={cloudsMaterialRef}
           vertexShader={cloudsVertexShader}
           fragmentShader={cloudsFragmentShader}
-          side={DoubleSide}
           transparent={true}
           uniforms={{
-            uResolution: { value: new Vector2(size.width, size.height) },
             uTime: { value: 0 },
-            uCloudColor1: { value: new Color(cloudsColor1) },
-            uCloudColor2: { value: new Color(cloudsColor2) },
-            uCloudColor3: { value: new Color(cloudsColor3) },
-            uCloudColor4: { value: new Color(cloudsColor4) },
+            uResolution: { value: new Vector2(2000, 2000) },
+            uCloudColor1: { value: new Color(0xdba9ff) },
+            uCloudColor2: { value: new Color(0xc0d4eb) },
+            uCloudColor3: { value: new Color(0x6e56d0) },
+            uCloudColor4: { value: new Color(0x8cadd5) },
           }}
         />
       </mesh>
 
       {/* <Bats /> */}
 
-      {/* Fog behind */}
-      {/* <mesh ref={fogMeshRef} position={(0, 0, -5)}>
-        <planeGeometry args={[width * 5, height * 4]} />
-        <shaderMaterial
-          vertexShader={fogVertexShader}
-          fragmentShader={fogFragmentShader}
-          side={DoubleSide}
-          transparent={true}
-          uniforms={{
-            uFogDensity: { value: 0.5 },
-            uTime: { value: 0 },
-            uPerlinTexture: { value: perlinTexture },
-          }}
-        />
-      </mesh> */}
-
       {/* Custom Fog foregound */}
-      <mesh ref={fogMeshRef} position={(0, 0, 0)}>
+      <mesh position={(0, 0, 0)}>
         <planeGeometry args={[width, height]} />
         <shaderMaterial
           ref={fogMaterialRef}
@@ -151,13 +158,33 @@ export default function Background() {
           fragmentShader={fogFragmentShader}
           uniforms={{
             uTime: { value: 0 },
-            uPerlinTexture: { value: perlinTexture },
             uFogColor: { value: new Color('#4d2c59') },
+            uPerlinTexture: { value: perlinTexture },
           }}
         />
       </mesh>
 
       <ParticlesFlow />
+
+      <primitive
+        position={[-3, -2, 3]}
+        object={treeClone}
+        scale={[1.5, 1.5, 1.5]}
+        rotation={[0, 0, 0]}
+      />
+      <primitive
+        position={[17, -4, -18]}
+        object={secondTreeClone}
+        scale={[3, 3, 3]}
+        rotation={[0, 0, 0]}
+      />
+
+      <primitive
+        position={[30, -6, -25]}
+        object={houseClone}
+        scale={[4, 4, 4]}
+        rotation={[0, -0.5, 0]}
+      />
     </>
   )
 }

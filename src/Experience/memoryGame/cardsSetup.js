@@ -1,8 +1,8 @@
 import { Color } from 'three'
-import PumpkinScene from '../scenes/PumpkinScene.jsx'
-import BatScene from '../scenes/BatScene.jsx'
-import CandleScene from '../scenes/CandleScene.jsx'
-import PotionScene from '../scenes/PotionScene.jsx'
+import PumpkinScene from './scenes/PumpkinScene.jsx'
+import BatScene from './scenes/BatScene.jsx'
+import CandleScene from './scenes/SkullCandleScene.jsx'
+import PotionScene from './scenes/EyeBallScene.jsx'
 
 export const cardsCount = 8
 export const horizontalGap = 1.5
@@ -12,20 +12,17 @@ export const portalScenes = [
   { name: 'pumpkin', scene: PumpkinScene },
   { name: 'bats', scene: BatScene },
   { name: 'candle', scene: CandleScene },
-  { name: 'potion', scene: PotionScene },
+  { name: 'eyeball', scene: PotionScene },
 ]
 
-// Function to create initial card data
 export const createInitialCards = (cardsCount, horizontalGap, verticalGap) => {
   const cards = []
   const elementPairs = []
 
-  // Assign each element twice (for pairing)
   portalScenes.forEach((portalScene) => {
     elementPairs.push(portalScene, portalScene)
   })
 
-  // Shuffle the element pairs
   const shuffledElements = elementPairs.sort(() => Math.random() - 0.5)
 
   for (let i = 0; i < cardsCount; i++) {

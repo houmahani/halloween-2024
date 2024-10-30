@@ -1,14 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { extend, useFrame, useLoader } from '@react-three/fiber'
 import { Html, Float, MeshPortalMaterial } from '@react-three/drei'
-import {
-  BackSide,
-  Color,
-  DoubleSide,
-  FrontSide,
-  RepeatWrapping,
-  Vector2,
-} from 'three'
+import { BackSide, Color, FrontSide, RepeatWrapping, Vector2 } from 'three'
 import { geometry } from 'maath'
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import {
@@ -19,25 +12,23 @@ import {
 } from './cardsSetup'
 import cardsVertexShader from '../materials/shaders/cards/vertex.glsl'
 import cardsFragmentShader from '../materials/shaders/cards/fragment.glsl'
-import PumpkinScene from '../scenes/PumpkinScene.jsx'
 import { useMatchedElements } from '../MatchedElementsContext.jsx'
 
 extend(geometry)
 
 export default function MemoryGame() {
-  const cardRefs = useRef([])
-  const cardMaterialRefs = useRef([])
-  const [flippedCards, setFlippedCards] = useState([])
-  const [hintText, setHintText] = useState('Turn over two cards to find pairs!')
   const { matchedElements, addMatchedElement } = useMatchedElements()
 
-  const pumpkinsTexture = useLoader(TextureLoader, '/pumpkins.png')
-  pumpkinsTexture.wrapS = RepeatWrapping
-  pumpkinsTexture.wrapT = RepeatWrapping
+  const cardRefs = useRef([])
+  const cardMaterialRefs = useRef([])
 
+  const [flippedCards, setFlippedCards] = useState([])
+  const [hintText, setHintText] = useState('Turn over two cards to find pairs!')
   const [cardsState, setCardsState] = useState(() =>
     createInitialCards(cardsCount, horizontalGap, verticalGap)
   )
+
+  const pumpkinsTexture = useLoader(TextureLoader, '/textures/pumpkins.png')
 
   const handleClick = (index) => {
     if (flippedCards.length === 2 || cardsState[index].flipped) {
@@ -125,7 +116,7 @@ export default function MemoryGame() {
         return (
           <Float
             key={index}
-            speed={1}
+            speed={2}
             rotationIntensity={0.01}
             floatIntensity={0.1}
             floatingRange={[-0.5, 0.5]}
@@ -141,7 +132,6 @@ export default function MemoryGame() {
 
                 {/* Front side - Portal Material */}
                 <MeshPortalMaterial side={BackSide} attachArray="material">
-                  {/* This will be the content of your portal */}
                   <PortalSceneComponent matchedElements={matchedElements} />
                 </MeshPortalMaterial>
               </mesh>
@@ -149,7 +139,7 @@ export default function MemoryGame() {
               <mesh>
                 <roundedPlaneGeometry args={[1.2, 2, 0.1]} />
 
-                {/* Back side - Simple Red Material */}
+                {/* Back side */}
                 <shaderMaterial
                   attachArray="material"
                   ref={(card) => (cardMaterialRefs.current[index] = card)}
@@ -178,9 +168,9 @@ export default function MemoryGame() {
         )
       })}
 
-      <Html as="div" wrapperClass="wrapper__hint">
+      {/* <Html as="div" wrapperClass="wrapper__hint">
         <div className="hint">{hintText}</div>
-      </Html>
+      </Html> */}
     </>
   )
 }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 html,
 body,
 #root {
@@ -7,6 +9,14 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
+  font-family: 'Inter var', sans-serif;
+  color: white;
+  background: #cc7b32;
+  user-select: none;
+}
+
+canvas {
+  background: linear-gradient(to bottom, #547bc1 0%, #111535 50%, #030a25 100%);
 }
 
 .wrapper__hint {
@@ -19,6 +29,7 @@ body,
   transform: none !important;
   pointer-events: none !important;
 }
+
 .hint {
   padding: 1rem 1.5rem;
   margin: 2rem;
@@ -30,6 +41,71 @@ body,
   pointer-events: none;
 }
 
-canvas {
-  background: linear-gradient(to bottom, #547bc1 0%, #111535 50%, #030a25 100%);
+.loader-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.loader {
+  width: 100%;
+  font-family:
+    'Space Mono',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Open Sans',
+    'Helvetica Neue',
+    sans-serif;
+  color: #ffffffd8;
+  font-size: 1rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #ffffff14;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 1s;
+}
+
+.bg {
+  background: linear-gradient(to top, #0a0a0a, #181a1a, #1d1d1f);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.notready {
+  color: #606060;
+}
+.clicked {
+  pointer-events: none;
+  opacity: 0;
+}
+
+a {
+  pointer-events: all;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: inherit;
 }
