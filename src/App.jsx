@@ -19,7 +19,6 @@ import Info from './Info.jsx'
 function App() {
   const [isLoaded, setIsLoaded] = useState(false) // Tracks if loading is complete
   const [userClicked, setUserClicked] = useState(false) // Tracks if user clicked "Enter Experience"
-  console.log(userClicked, isLoaded)
 
   // Click handler for the button
   const handleUserClick = () => setUserClicked(true)

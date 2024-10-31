@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 
 const Loader = ({ setIsLoaded }) => {
   const { progress } = useProgress()
-  console.log(progress)
 
   useEffect(() => {
     if (progress === 100) {
