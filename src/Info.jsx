@@ -5,7 +5,7 @@ const Info = () => {
         <div className="container">
           <div className="about">
             Experience made for Three.js Journey Halloween 2024 challenge
-            <ul>
+            {/* <ul>
               <li>
                 <a href="https://houmahanikane.com/" target="_blank">
                   Houmahani Kane
@@ -20,7 +20,7 @@ const Info = () => {
               <li>
                 <a href="mailto:houmahanikane@gmail.com">Email</a>
               </li>
-            </ul>
+            </ul> */}
           </div>
 
           <div className="ressources">
