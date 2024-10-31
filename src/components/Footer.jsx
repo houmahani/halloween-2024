@@ -7,22 +7,22 @@ const Footer = () => {
         <div className="container">
           <div className="about">
             Experience made for Three.js Journey Halloween 2024 challenge
-            {/* <ul>
-              <li>
+            <ul>
+              {/* <li>
                 <a href="https://houmahanikane.com/" target="_blank">
                   Houmahani Kane
                 </a>
-              </li>
+              </li> */}
               <li>
                 {' '}
                 <a href="https://x.com/houm_kn" target="_blank">
                   @houm_kn
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a href="mailto:houmahanikane@gmail.com">Email</a>
-              </li>
-            </ul> */}
+              </li> */}
+            </ul>
           </div>
 
           <div className="ressources">
