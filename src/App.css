@@ -1,5 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
+* {
+  box-sizing: border-box;
+}
 html,
 body,
 #root {
@@ -9,7 +12,7 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: 'Inter var', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   color: white;
   background: #cc7b32;
   user-select: none;
@@ -19,15 +22,62 @@ canvas {
   background: linear-gradient(to bottom, #547bc1 0%, #111535 50%, #030a25 100%);
 }
 
-.wrapper__hint {
+.wrapper {
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end;
+  justify-content: center;
   width: 100%;
-  height: 100%;
+  height: 95%;
   user-select: none !important;
   transform: none !important;
   pointer-events: none !important;
+}
+
+button {
+  padding: 1rem 2rem;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  border: 1px solid #ffffff1a;
+  border-radius: 5px;
+  background-color: #030a2546;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: hintGlow 3s infinite ease-in-out; /* Subtle glowing effect */
+  z-index: 99;
+  pointer-events: auto;
+}
+
+button:hover {
+  background-color: #0c1a4c46;
+  border-color: #ffffff99;
+  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: 0px 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Inner shimmer effect for subtle elegance */
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: transform 0.5s;
+}
+
+button:hover::before {
+  transform: translateX(100%);
 }
 
 .hint {
@@ -48,19 +98,7 @@ canvas {
 
 .loader {
   width: 100%;
-  font-family:
-    'Space Mono',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: 'JetBrains Mono', monospace;
   color: #ffffffd8;
   font-size: 1rem;
 }
@@ -108,4 +146,92 @@ a {
 a:hover {
   text-decoration: underline;
   color: inherit;
+}
+
+@keyframes hintGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+}
+
+.wrapper.intro {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(40, 41, 49, 0.2);
+  backdrop-filter: blur(20px);
+  justify-content: center;
+  align-items: center;
+  pointer-events: all;
+  z-index: 999 !important;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.wrapper.intro.hide {
+  opacity: 0;
+}
+
+.wrapper.intro.show {
+  transition-delay: 0.05s;
+  opacity: 1;
+}
+
+footer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  opacity: 0.8;
+}
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+footer .container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+footer .contact {
+  display: block;
+  width: 100%;
+}
+
+footer .about {
+  max-width: 300px;
+}
+
+footer .ressources {
+  display: flex;
+  gap: 2rem;
+}
+ul {
+  list-style-type: none;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+
+li {
+  color: #949494;
+}
+li span {
+  color: #d5d4d4;
 }

@@ -10,18 +10,35 @@ import {
 import { MatchedElementsProvider } from './Experience/MatchedElementsContext.jsx'
 import Experience from './Experience/Experience.jsx'
 import Loader from './Loader.jsx'
-import { PositionalAudio } from '@react-three/drei'
+import { Html, PositionalAudio, useProgress } from '@react-three/drei'
+import { AudioProvider, useAudio } from './AudioContext.jsx'
+import Intro from './Intro.jsx'
+import Background from './Experience/background/Background.jsx'
+import Info from './Info.jsx'
 
 function App() {
+  const [isLoaded, setIsLoaded] = useState(false) // Tracks if loading is complete
+  const [userClicked, setUserClicked] = useState(false) // Tracks if user clicked "Enter Experience"
+  console.log(userClicked, isLoaded)
+
+  // Click handler for the button
+  const handleUserClick = () => setUserClicked(true)
   return (
     <>
-      <Leva flat />
+      <Leva flat collapsed hidden={!isLoaded || !userClicked} />
 
       <Canvas>
-        <Suspense fallback={<Loader />}>
-          <MatchedElementsProvider>
-            <Experience />
-          </MatchedElementsProvider>
+        <Suspense fallback={<Loader setIsLoaded={setIsLoaded} />}>
+          <AudioProvider>
+            <MatchedElementsProvider>
+              <Experience />
+              <Intro
+                isLoaded={isLoaded}
+                userClicked={userClicked}
+                handleUserClick={handleUserClick}
+              />
+            </MatchedElementsProvider>
+          </AudioProvider>
         </Suspense>
 
         <EffectComposer>
@@ -34,7 +51,6 @@ function App() {
             averageLuminance={0}
             adaptationRate={0.2}
           />
-
           <Vignette
             offset={0.4}
             darkness={0.7}
@@ -43,6 +59,8 @@ function App() {
           />
         </EffectComposer>
       </Canvas>
+
+      <Info />
     </>
   )
 }

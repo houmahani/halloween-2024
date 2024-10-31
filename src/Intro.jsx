@@ -1,29 +1,22 @@
-import { Suspense, cloneElement, useEffect, useState } from 'react'
+import { Html } from '@react-three/drei'
+import { useAudio } from './AudioContext'
 
-function Ready({ setReady }) {
-  useEffect(() => {
-    setReady(true) // Set ready to true once Suspense exits fallback
-  }, [setReady])
-  return null
-}
+const Intro = ({ isLoaded, userClicked, handleUserClick }) => {
+  const { enableAudio } = useAudio()
 
-export default function Intro({ children }) {
-  const [clicked, setClicked] = useState(false)
-  const [ready, setReady] = useState(false)
+  const handleEnterClick = () => {
+    enableAudio() // Enable audio in context
+    handleUserClick() // Trigger user entry
+  }
+
   return (
-    <>
-      <Suspense fallback={<Ready setReady={setReady} />}>
-        {cloneElement(children, { ready: clicked && ready })}
-      </Suspense>
-      <div
-        className={`fullscreen bg ${ready ? 'ready' : 'notready'} ${clicked && 'clicked'}`}
-      >
-        <div className="stack">
-          <a href="#" onClick={() => setClicked(true)}>
-            {!ready ? 'loading' : 'click to continue'}
-          </a>
-        </div>
-      </div>
-    </>
+    <Html
+      as="div"
+      wrapperClass={`wrapper intro ${userClicked ? 'hide' : isLoaded ? 'show' : ''}`}
+    >
+      <button onClick={handleEnterClick}>Enter with sound</button>
+    </Html>
   )
 }
+
+export default Intro

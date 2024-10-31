@@ -1,83 +1,113 @@
 import { useRef, useEffect, useState, useMemo } from 'react'
 import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useLoader } from '@react-three/fiber'
 import { useMatchedElements } from '../MatchedElementsContext.jsx'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 function Bats() {
-  const spheresRef = useRef([]) // Store references to each sphere
+  const batsRef = useRef([]) // Store references to each bat
   const [animationTriggered, setAnimationTriggered] = useState(false)
-  const { matchedElements } = useMatchedElements()
+  const { matchedElements, checkMatchedElement } = useMatchedElements()
+  const batGltf = useLoader(GLTFLoader, '/models/bat.glb')
+  const numBats = 10
 
-  const numSpheres = 10
+  const leftWingRefs = useRef([])
+  const rightWingRefs = useRef([])
 
-  // Initialize start and end positions, and spheres only once
   const { startPositions, endPositions } = useMemo(() => {
     const starts = []
     const ends = []
-    const spheres = []
+    const bats = []
 
-    for (let i = 0; i < numSpheres; i++) {
+    for (let i = 0; i < numBats; i++) {
       const startPosition = new THREE.Vector3(0, 0, 0)
       const endPosition = new THREE.Vector3(
-        (Math.random() - 0.5) * 10,
-        (Math.random() - 0.5) * 5,
-        (Math.random() - 0.5) * 20
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - -1) * 5
       )
 
       starts.push(startPosition)
       ends.push(endPosition)
 
-      const sphereGeometry = new THREE.SphereGeometry(0.2, 16, 16)
-      const sphereMaterial = new THREE.MeshStandardMaterial({
-        color: 'black',
-        transparent: true,
-        opacity: 0,
+      const batClone = batGltf.scene.clone() // Create a new clone for each bat
+      batClone.position.copy(startPosition)
+      batClone.traverse((child) => {
+        if (child.isMesh) {
+          child.material = child.material.clone() // Clone the material for each bat
+          child.material.transparent = true
+          child.material.opacity = 0
+        }
+        if (child.name === 'left_wing') leftWingRefs.current.push(child)
+        if (child.name === 'right_wing') rightWingRefs.current.push(child)
       })
-
-      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-      sphere.position.copy(startPosition)
-      spheres.push(sphere)
+      bats.push(batClone)
     }
 
-    spheresRef.current = spheres // Store spheres in the ref
+    batsRef.current = bats // Store bats in the ref
 
     return { startPositions: starts, endPositions: ends }
-  }, [numSpheres])
+  }, [batGltf, numBats])
+
+  // Track matched elements to trigger animation
+  // useEffect(() => {
+  //   if (matchedElements.includes('bats')) {
+  //     setAnimationTriggered(true)
+  //   }
+  // }, [matchedElements])
 
   useFrame((state, delta) => {
     if (
-      !animationTriggered ||
-      spheresRef.current.length === 0 ||
-      endPositions.length === 0
+      !checkMatchedElement('candle') &&
+      (!animationTriggered ||
+        batsRef.current.length === 0 ||
+        endPositions.length === 0)
     )
       return
 
-    spheresRef.current.forEach((sphere, i) => {
-      if (sphere && endPositions[i]) {
+    const time = state.clock.getElapsedTime()
+    const flapAmplitude = 0.5 // Adjust for the flapping range
+    const flapSpeed = 20 // Adjust for flapping speed
+
+    batsRef.current.forEach((bat, i) => {
+      if (bat && endPositions[i]) {
         // Interpolate position towards the end position
-        sphere.position.lerp(endPositions[i], delta * 0.5)
+        bat.position.lerp(endPositions[i], delta * 0.5)
 
-        // Gradually increase opacity
-        if (sphere.material.opacity < 1) {
-          sphere.material.opacity += delta * 0.5
+        // Calculate the distance to the end position
+        const distanceToEnd = bat.position.distanceTo(endPositions[i])
+
+        // Control opacity based on distance
+        bat.traverse((child) => {
+          if (child.isMesh) {
+            if (distanceToEnd > 2 && child.material.opacity < 1) {
+              // Increase opacity to fully visible if still far from the end
+              child.material.opacity += delta * 0.5
+            } else if (distanceToEnd <= 2) {
+              // Start fading out when close to the end position
+              child.material.opacity -= delta * 0.5
+            }
+            child.material.needsUpdate = true
+          }
+        })
+
+        // Wing flapping animation
+        if (leftWingRefs.current[i]) {
+          leftWingRefs.current[i].rotation.z =
+            Math.sin(time * flapSpeed) * flapAmplitude
         }
-
-        sphere.material.needsUpdate = true // Ensure material updates
+        if (rightWingRefs.current[i]) {
+          rightWingRefs.current[i].rotation.z =
+            -Math.sin(time * flapSpeed) * flapAmplitude // Opposite direction
+        }
       }
     })
   })
 
-  // Trigger animation
-  useEffect(() => {
-    if (matchedElements.includes('bats')) {
-      setAnimationTriggered(true)
-    }
-  }, [matchedElements])
-
   return (
     <>
-      {spheresRef.current.map((sphere, i) => (
-        <primitive object={sphere} key={i} />
+      {batsRef.current.map((bat, i) => (
+        <primitive object={bat} key={i} />
       ))}
     </>
   )

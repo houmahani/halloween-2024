@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import { BackSide, MeshBasicMaterial } from 'three'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { PositionalAudio } from '@react-three/drei'
 
 const BatScene = ({ matchedElements }) => {
   const batGltf = useLoader(GLTFLoader, '/models/bat.glb')
@@ -45,6 +46,15 @@ const BatScene = ({ matchedElements }) => {
 
   return (
     <group>
+      {matchedElements.includes('bats') && (
+        <PositionalAudio
+          autoplay
+          loop={false}
+          url="/sounds/magic_wings.mp3"
+          distance={1}
+        />
+      )}
+
       {/* Lights */}
       <ambientLight intensity={1} />
       <directionalLight position={[10, 10, -5]} intensity={2} />

@@ -1,22 +1,20 @@
 import { Html, useProgress } from '@react-three/drei'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-const Loader = () => {
+const Loader = ({ setIsLoaded }) => {
   const { progress } = useProgress()
+  console.log(progress)
+
+  useEffect(() => {
+    if (progress === 100) {
+      setIsLoaded(true)
+    }
+  }, [progress, setIsLoaded]) // Added showButton dependency here
 
   return (
     <Html center wrapperClass="loader-wrapper">
       <div className="loader">
-        <p>loading the experience</p>
-        <div className="progress-bar">
-          <div
-            style={{
-              width: `${progress}%`,
-              height: '100%',
-              background: '#d43c05',
-            }}
-          />
-        </div>
+        <p>{Math.floor(progress)}%</p>
       </div>
     </Html>
   )

@@ -17,12 +17,20 @@ import { useMatchedElements } from '../MatchedElementsContext.jsx'
 extend(geometry)
 
 export default function MemoryGame() {
-  const { matchedElements, addMatchedElement } = useMatchedElements()
+  const {
+    matchedElements,
+    setMatchedElements,
+    addMatchedElement,
+    userHasWon,
+    setUserHasWon,
+  } = useMatchedElements()
 
   const cardRefs = useRef([])
   const cardMaterialRefs = useRef([])
 
   const [flippedCards, setFlippedCards] = useState([])
+
+  const [resetGame, setResetGame] = useState(false)
   const [hintText, setHintText] = useState('Turn over two cards to find pairs!')
   const [cardsState, setCardsState] = useState(() =>
     createInitialCards(cardsCount, horizontalGap, verticalGap)
@@ -43,6 +51,22 @@ export default function MemoryGame() {
 
     setFlippedCards((prevFlipped) => [...prevFlipped, index])
   }
+
+  // Reset game logic and clear matched elements
+  useEffect(() => {
+    if (resetGame) {
+      // Clear matched elements and reshuffle the cards
+      setMatchedElements([])
+      setCardsState(createInitialCards(cardsCount, horizontalGap, verticalGap)) // Regenerate shuffled cards
+
+      // Reset card flipped state after reshuffling
+      setCardsState((prevCards) =>
+        prevCards.map((card) => ({ ...card, flipped: false }))
+      )
+
+      setResetGame(false) // End reset state
+    }
+  }, [resetGame, setMatchedElements])
 
   useEffect(() => {
     if (flippedCards.length === 1) {
@@ -65,6 +89,7 @@ export default function MemoryGame() {
           setTimeout(() => {
             const allMatched = cardsState.every((card) => card.flipped)
             if (allMatched) {
+              setUserHasWon(true)
               setHintText('Congratulations! You matched all the pairs! 🎉')
             } else {
               setTimeout(() => {
@@ -93,10 +118,18 @@ export default function MemoryGame() {
     }
   }, [flippedCards])
 
+  const handlePlayAgain = () => {
+    setResetGame(true)
+    setUserHasWon(false)
+  }
+
   useFrame((state, delta) => {
     cardRefs.current.forEach((ref, i) => {
-      if (ref) {
+      if (ref && !resetGame) {
         const targetRotation = cardsState[i].flipped ? Math.PI : 0
+        ref.rotation.y += (targetRotation - ref.rotation.y) * delta * 4
+      } else if (ref && resetGame) {
+        const targetRotation = cardsState[i].flipped ? 0 : Math.PI
         ref.rotation.y += (targetRotation - ref.rotation.y) * delta * 4
       }
     })
@@ -107,6 +140,10 @@ export default function MemoryGame() {
       }
     })
   })
+
+  function shuffleCards() {
+    cardsState.sort(() => Math.random() - 0.5)
+  }
 
   return (
     <>
@@ -167,6 +204,12 @@ export default function MemoryGame() {
           </Float>
         )
       })}
+
+      {userHasWon && (
+        <Html as="div" wrapperClass="wrapper">
+          <button onClick={handlePlayAgain}>Play again</button>
+        </Html>
+      )}
 
       {/* <Html as="div" wrapperClass="wrapper__hint">
         <div className="hint">{hintText}</div>

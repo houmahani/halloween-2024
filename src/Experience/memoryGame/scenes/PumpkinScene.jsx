@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { BackSide, MeshStandardMaterial } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { PositionalAudio } from '@react-three/drei'
 
 const PumpkinScene = ({ matchedElements }) => {
   const groupRef = useRef()
@@ -48,6 +49,14 @@ const PumpkinScene = ({ matchedElements }) => {
 
   return (
     <group>
+      {matchedElements.includes('candle') && (
+        <PositionalAudio
+          autoplay
+          loop={false}
+          url="/sounds/candle-lighting.mp3"
+          distance={0.8}
+        />
+      )}
       {/* Lights */}
       <directionalLight
         position={[0, 0, -5]}

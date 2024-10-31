@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import { MeshReflectorMaterial, PositionalAudio } from '@react-three/drei'
 import { GLTFLoader } from 'three/examples/jsm/Addons.js'
@@ -17,15 +17,18 @@ import cloudsVertexShader from '../materials/shaders/clouds/vertex.glsl'
 import cloudsFragmentShader from '../materials/shaders/clouds/fragment.glsl'
 import ParticlesFlow from './ParticlesFlow.jsx'
 import { useMatchedElements } from '../MatchedElementsContext.jsx'
+import Bats from './Bats.jsx'
+import { useAudio } from '../../AudioContext.jsx'
 
 export default function Background() {
   const emissiveObjectRef = useRef([])
   const foregroundTreeRef = useRef()
   const backgroundTreeRef = useRef()
   const { width, height } = useThree((state) => state.viewport)
-  const { matchedElements, audioTriggered } = useMatchedElements()
+
   const fogMaterialRef = useRef()
   const cloudsMaterialRef = useRef()
+  const { matchedElements } = useMatchedElements()
 
   const perlinTexture = useLoader(TextureLoader, '/textures/fog-noise.png')
   const treeGltf = useLoader(GLTFLoader, '/models/tree.glb')
@@ -75,13 +78,26 @@ export default function Background() {
       }
     }
   })
-
+  const cloudsUniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uResolution: { value: new Vector2(2000, 2000) },
+      uCloudColor1: { value: new Color(0xdba9ff) },
+      uCloudColor2: { value: new Color(0xc0d4eb) },
+      uCloudColor3: { value: new Color(0x6e56d0) },
+      uCloudColor4: { value: new Color(0x8cadd5) },
+    }),
+    []
+  )
   // Handle opacity in the `useFrame` loop
   useFrame((state, delta) => {
     if (cloudsMaterialRef.current) {
       cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
+      cloudsMaterialRef.current.uniforms.uTime.needsUpdate = true
     }
+  })
 
+  useFrame((state, delta) => {
     if (matchedElements.includes('candle')) {
       emissiveObjectRef.current.forEach((material) => {
         if (material.opacity < 1) {
@@ -89,7 +105,6 @@ export default function Background() {
         }
       })
     }
-
     if (foregroundTreeRef.current) {
       const sway = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.05
       foregroundTreeRef.current.rotation.z = sway
@@ -100,18 +115,8 @@ export default function Background() {
       backgroundTreeRef.current.rotation.z = sway
     }
   })
-
   return (
     <>
-      {audioTriggered && (
-        <PositionalAudio
-          autoplay
-          loop
-          url="/sounds/ambience.mp3"
-          distance={0.8}
-        />
-      )}
-
       {/* Floor */}
       <mesh position={[0, -4, -5]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[width * 4, 20, 100, 100]} />
@@ -147,14 +152,7 @@ export default function Background() {
           vertexShader={cloudsVertexShader}
           fragmentShader={cloudsFragmentShader}
           transparent={true}
-          uniforms={{
-            uTime: { value: 0 },
-            uResolution: { value: new Vector2(2000, 2000) },
-            uCloudColor1: { value: new Color(0xdba9ff) },
-            uCloudColor2: { value: new Color(0xc0d4eb) },
-            uCloudColor3: { value: new Color(0x6e56d0) },
-            uCloudColor4: { value: new Color(0x8cadd5) },
-          }}
+          uniforms={cloudsUniforms}
         />
       </mesh>
 
@@ -192,7 +190,6 @@ export default function Background() {
         scale={[3, 3, 3]}
         rotation={[0, 0, 0]}
       />
-
       <primitive
         position={[30, -6, -25]}
         object={houseClone}

@@ -1,4 +1,8 @@
-import { OrthographicCamera, PerspectiveCamera } from '@react-three/drei'
+import {
+  OrthographicCamera,
+  PerspectiveCamera,
+  PositionalAudio,
+} from '@react-three/drei'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import { useRef, useEffect } from 'react'
 import { BackSide, DoubleSide, MeshPhysicalMaterial, Vector3 } from 'three'
@@ -36,6 +40,15 @@ const EyeBallScene = ({ matchedElements }) => {
 
   return (
     <group>
+      {matchedElements.includes('eyeball') && (
+        <PositionalAudio
+          autoplay
+          loop={false}
+          url="/sounds/geistergeheul.mp3"
+          distance={0.1}
+        />
+      )}
+
       {/* Lights */}
       <ambientLight intensity={0.6} />
       <directionalLight position={[10, 10, -5]} intensity={2} castShadow />

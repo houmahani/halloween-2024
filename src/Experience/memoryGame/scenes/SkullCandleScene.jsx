@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { useRef } from 'react'
 import candleFlameVertexShader from '../../materials/shaders/flame/vertex.glsl'
 import candleFlameFragmentShader from '../../materials/shaders/flame/fragment.glsl'
+import { PositionalAudio } from '@react-three/drei'
 
 const SkullCandleScene = ({ matchedElements }) => {
   const flameMaterialRef = useRef()
@@ -48,6 +49,15 @@ const SkullCandleScene = ({ matchedElements }) => {
 
   return (
     <group>
+      {matchedElements.includes('candle') && (
+        <PositionalAudio
+          autoplay
+          loop={false}
+          url="/sounds/candle-lighting.mp3"
+          distance={0.8}
+        />
+      )}
+
       {/* Lights */}
       <ambientLight intensity={1} />
       <directionalLight position={[10, 10, -5]} intensity={1} castShadow />
