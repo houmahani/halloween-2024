@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { BlendFunction } from 'postprocessing'
 import { Leva } from 'leva'
@@ -7,18 +7,18 @@ import {
   ToneMapping,
   Vignette,
 } from '@react-three/postprocessing'
-import { MatchedElementsProvider } from './Experience/MatchedElementsContext.jsx'
-import Experience from './Experience/Experience.jsx'
-import Loader from './Loader.jsx'
-import { AudioProvider } from './AudioContext.jsx'
-import Intro from './Intro.jsx'
-import Info from './Info.jsx'
+import { AudioProvider } from '@/contexts/AudioContext.jsx'
+import { MemoryGameContextProvider } from '@/contexts/MemoryGameContext.jsx'
+import Experience from '@/components/Experience/Experience.jsx'
+import Loader from '@/components/Loader.jsx'
+import Intro from '@/components/Intro.jsx'
+import Footer from '@/components/Footer.jsx'
+import '@/style/app.css'
 
 function App() {
-  const [isLoaded, setIsLoaded] = useState(false) // Tracks if loading is complete
-  const [userClicked, setUserClicked] = useState(false) // Tracks if user clicked "Enter Experience"
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [userClicked, setUserClicked] = useState(false)
 
-  // Click handler for the button
   const handleUserClick = () => setUserClicked(true)
   return (
     <>
@@ -27,14 +27,14 @@ function App() {
       <Canvas>
         <Suspense fallback={<Loader setIsLoaded={setIsLoaded} />}>
           <AudioProvider>
-            <MatchedElementsProvider>
+            <MemoryGameContextProvider>
               <Experience userClicked={userClicked} />
               <Intro
                 isLoaded={isLoaded}
                 userClicked={userClicked}
                 handleUserClick={handleUserClick}
               />
-            </MatchedElementsProvider>
+            </MemoryGameContextProvider>
           </AudioProvider>
         </Suspense>
 
@@ -57,7 +57,7 @@ function App() {
         </EffectComposer>
       </Canvas>
 
-      <Info />
+      <Footer />
     </>
   )
 }

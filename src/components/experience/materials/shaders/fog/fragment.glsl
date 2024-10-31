@@ -1,0 +1,14 @@
+uniform vec3 uFogColor;
+uniform sampler2D uPerlinTexture;
+
+varying vec2 vUv;
+
+void main() {
+    float fog = texture(uPerlinTexture, vUv).r;
+
+    float alphaTop = smoothstep(0.2, 0.5, vUv.y ); 
+    float alphaBottom = 1.0 - smoothstep(0.4, 0.8, vUv.y);
+
+    float alpha = alphaTop * alphaBottom * fog * 10.0;
+    gl_FragColor = vec4(uFogColor, fog);
+}
