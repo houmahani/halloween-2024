@@ -7,7 +7,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 function Bats() {
   const batsRef = useRef([]) // Store references to each bat
   const [animationTriggered, setAnimationTriggered] = useState(false)
-  const { matchedElements, checkMatchedElement } = useMatchedElements()
+  const {
+    matchedElements,
+
+    resetGame,
+  } = useMatchedElements()
   const batGltf = useLoader(GLTFLoader, '/models/bat.glb')
   const numBats = 10
 
@@ -49,19 +53,51 @@ function Bats() {
     return { startPositions: starts, endPositions: ends }
   }, [batGltf, numBats])
 
+  // Reset animation on game reset
+  useEffect(() => {
+    if (resetGame) {
+      setAnimationTriggered(false)
+      batsRef.current.forEach((bat, i) => {
+        bat.position.copy(startPositions[i]) // Reset bat position
+        bat.traverse((child) => {
+          if (child.isMesh) {
+            child.material.opacity = 0 // Reset opacity
+            child.material.needsUpdate = true
+          }
+        })
+      })
+    }
+  }, [resetGame, startPositions])
+
   // Track matched elements to trigger animation
-  // useEffect(() => {
-  //   if (matchedElements.includes('bats')) {
-  //     setAnimationTriggered(true)
-  //   }
-  // }, [matchedElements])
+  useEffect(() => {
+    if (matchedElements.includes('bats') && !animationTriggered) {
+      setAnimationTriggered(true)
+
+      // Reset animation after 5 seconds
+      const timeout = setTimeout(() => {
+        setAnimationTriggered(false)
+        // Reset positions and opacities
+        batsRef.current.forEach((bat, i) => {
+          bat.position.copy(startPositions[i])
+          bat.traverse((child) => {
+            if (child.isMesh) {
+              child.material.opacity = 0
+              child.material.needsUpdate = true
+            }
+          })
+        })
+      }, 5000)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [matchedElements, animationTriggered, startPositions])
 
   useFrame((state, delta) => {
     if (
-      !checkMatchedElement('candle') &&
-      (!animationTriggered ||
-        batsRef.current.length === 0 ||
-        endPositions.length === 0)
+      !animationTriggered ||
+      batsRef.current.length === 0 ||
+      endPositions.length === 0
     )
       return
 

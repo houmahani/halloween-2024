@@ -1,12 +1,11 @@
-import { Html, OrbitControls, PositionalAudio } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import MemoryGame from './memoryGame/MemoryGame.jsx'
 import Background from './background/Background.jsx'
-import SoundManager, { useSoundControls } from './SoundManager.jsx'
-import { useEffect, useRef, useState } from 'react'
+
 import { useAudio } from '../AudioContext.jsx'
 
-export default function Experience({ ready }) {
+export default function Experience({ userClicked }) {
   const { enableOrbitControls } = useControls('Behind the scene', {
     enableOrbitControls: false,
   })
@@ -20,7 +19,7 @@ export default function Experience({ ready }) {
         onClick={() => setAudioTriggered(true)}
         audioTriggered={audioTriggered}
       />
-      <MemoryGame />
+      <MemoryGame userClicked={userClicked} />
     </>
   )
 }

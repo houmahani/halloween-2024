@@ -60,7 +60,7 @@ const BatScene = ({ matchedElements }) => {
       <directionalLight position={[10, 10, -5]} intensity={2} />
 
       {/* Background */}
-      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]} receiveShadow>
+      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]}>
         <planeGeometry args={[10, 10]} />
         <meshBasicMaterial color={'#ffbb00'} side={BackSide} />
       </mesh>

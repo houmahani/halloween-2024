@@ -7,7 +7,6 @@ import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import { useRef, useEffect } from 'react'
 import { BackSide, DoubleSide, MeshPhysicalMaterial, Vector3 } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { cameraPosition } from 'three/webgpu'
 
 const EyeBallScene = ({ matchedElements }) => {
   const groupRef = useRef()
@@ -51,10 +50,10 @@ const EyeBallScene = ({ matchedElements }) => {
 
       {/* Lights */}
       <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 10, -5]} intensity={2} castShadow />
+      <directionalLight position={[10, 10, -5]} intensity={2} />
 
       {/* Background */}
-      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]} receiveShadow>
+      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]}>
         <planeGeometry args={[10, 10]} />
         <meshBasicMaterial color={'#26a4ff'} side={BackSide} />
       </mesh>

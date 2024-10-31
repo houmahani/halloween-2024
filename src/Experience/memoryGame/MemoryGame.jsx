@@ -16,13 +16,15 @@ import { useMatchedElements } from '../MatchedElementsContext.jsx'
 
 extend(geometry)
 
-export default function MemoryGame() {
+export default function MemoryGame({ userClicked }) {
   const {
     matchedElements,
     setMatchedElements,
     addMatchedElement,
     userHasWon,
     setUserHasWon,
+    resetGame,
+    setResetGame,
   } = useMatchedElements()
 
   const cardRefs = useRef([])
@@ -30,7 +32,6 @@ export default function MemoryGame() {
 
   const [flippedCards, setFlippedCards] = useState([])
 
-  const [resetGame, setResetGame] = useState(false)
   const [hintText, setHintText] = useState('Turn over two cards to find pairs!')
   const [cardsState, setCardsState] = useState(() =>
     createInitialCards(cardsCount, horizontalGap, verticalGap)
@@ -39,6 +40,7 @@ export default function MemoryGame() {
   const pumpkinsTexture = useLoader(TextureLoader, '/textures/pumpkins.png')
 
   const handleClick = (index) => {
+    if (!userClicked) return
     if (flippedCards.length === 2 || cardsState[index].flipped) {
       return
     }

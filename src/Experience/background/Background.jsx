@@ -1,14 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import { MeshReflectorMaterial, PositionalAudio } from '@react-three/drei'
-import { GLTFLoader } from 'three/examples/jsm/Addons.js'
-import {
-  Color,
-  DoubleSide,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
-  Vector2,
-} from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { Color, DoubleSide, MeshStandardMaterial, Vector2 } from 'three'
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import fogVertexShader from '../materials/shaders/fog/vertex.glsl'
@@ -18,22 +12,27 @@ import cloudsFragmentShader from '../materials/shaders/clouds/fragment.glsl'
 import ParticlesFlow from './ParticlesFlow.jsx'
 import { useMatchedElements } from '../MatchedElementsContext.jsx'
 import Bats from './Bats.jsx'
-import { useAudio } from '../../AudioContext.jsx'
+import { DRACOLoader } from 'three/examples/jsm/Addons.js'
 
 export default function Background() {
   const emissiveObjectRef = useRef([])
   const foregroundTreeRef = useRef()
   const backgroundTreeRef = useRef()
   const { width, height } = useThree((state) => state.viewport)
+  const { matchedElements } = useMatchedElements()
 
   const fogMaterialRef = useRef()
   const cloudsMaterialRef = useRef()
-  const { matchedElements } = useMatchedElements()
 
   const perlinTexture = useLoader(TextureLoader, '/textures/fog-noise.png')
-  const treeGltf = useLoader(GLTFLoader, '/models/tree.glb')
+  const treeGltf = useLoader(GLTFLoader, '/models/tree.glb', (loader) => {
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath('/draco/') // Path to the Draco decoder files
+    loader.setDRACOLoader(dracoLoader)
+  })
   const house = useLoader(GLTFLoader, '/models/house.glb')
 
+  // Initialize trees and house clones
   const treeClone = clone(treeGltf.scene)
   treeClone.traverse((child) => {
     if (child.isMesh) {
@@ -47,37 +46,31 @@ export default function Background() {
       child.material = new MeshStandardMaterial({ color: 0x000000 })
     }
   })
-  // Clone the house object
+
   const houseClone = clone(house.scene)
-  emissiveObjectRef.current = [] // Initialize the array only once, outside of traverse
 
-  // Traverse through the clone
-  houseClone.traverse((child) => {
-    if (child.children.length > 0) {
-      const houseMesh = child.children[0]
-
-      if (houseMesh.children.length > 0) {
-        const emissiveChild = houseMesh.children[0]
-
-        // Set the emissive material on the target child
-        emissiveChild.material = new MeshStandardMaterial({
-          color: '#ffd900',
-          emissive: '#ffd900',
-          emissiveIntensity: 2,
-          transparent: true,
-          opacity: 0,
-          side: DoubleSide,
-        })
-
-        emissiveChild.material.needsUpdate = true
-
-        // Add the material reference to the array if it’s not already there
-        if (!emissiveObjectRef.current.includes(emissiveChild.material)) {
+  useEffect(() => {
+    // Initialize emissive materials in house clone
+    houseClone.traverse((child) => {
+      if (child.children.length > 0) {
+        const houseMesh = child.children[0]
+        if (houseMesh.children.length > 0) {
+          const emissiveChild = houseMesh.children[0]
+          emissiveChild.material = new MeshStandardMaterial({
+            color: '#ffd900',
+            emissive: '#ffd900',
+            emissiveIntensity: 2,
+            transparent: true,
+            opacity: 0,
+            side: DoubleSide,
+          })
           emissiveObjectRef.current.push(emissiveChild.material)
         }
       }
-    }
-  })
+    })
+  }, [houseClone])
+
+  // Cloud uniforms
   const cloudsUniforms = useMemo(
     () => ({
       uTime: { value: 0 },
@@ -89,32 +82,33 @@ export default function Background() {
     }),
     []
   )
-  // Handle opacity in the `useFrame` loop
-  useFrame((state, delta) => {
-    if (cloudsMaterialRef.current) {
-      cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
-      cloudsMaterialRef.current.uniforms.uTime.needsUpdate = true
-    }
-  })
 
-  useFrame((state, delta) => {
+  // Opacity control for the emissive material of the house
+  useEffect(() => {
     if (matchedElements.includes('candle')) {
       emissiveObjectRef.current.forEach((material) => {
-        if (material.opacity < 1) {
-          material.opacity += delta * 0.5 // Increase opacity gradually
-        }
+        material.opacity = 1 // Ensure opacity stays at 1 once triggered
+        material.needsUpdate = true
       })
     }
-    if (foregroundTreeRef.current) {
-      const sway = Math.sin(state.clock.getElapsedTime() * 0.3) * 0.05
-      foregroundTreeRef.current.rotation.z = sway
+  }, [matchedElements])
+
+  useFrame((state, delta) => {
+    // Clouds animation
+    if (cloudsMaterialRef.current) {
+      cloudsMaterialRef.current.uniforms.uTime.value += delta * 0.5
     }
 
+    // Tree swaying effect
+    const swayFactor = Math.sin(state.clock.getElapsedTime())
+    if (foregroundTreeRef.current) {
+      foregroundTreeRef.current.rotation.z = swayFactor * 0.05
+    }
     if (backgroundTreeRef.current) {
-      const sway = Math.sin(state.clock.getElapsedTime() * 0.2) * 0.05
-      backgroundTreeRef.current.rotation.z = sway
+      backgroundTreeRef.current.rotation.z = swayFactor * 0.03
     }
   })
+
   return (
     <>
       {/* Floor */}
@@ -136,10 +130,9 @@ export default function Background() {
       {/* Moon */}
       <mesh position={[10, 12, -25]}>
         <circleGeometry args={[15, 64, 64]} />
-        {/* Radius, width segments, height segments */}
         <meshStandardMaterial
           color={0xffffff}
-          emissive={0xffff00} // Makes the moon look like it's glowing
+          emissive={0xffff00}
           emissiveIntensity={0.5}
         />
       </mesh>
@@ -156,10 +149,10 @@ export default function Background() {
         />
       </mesh>
 
-      {/* <Bats /> */}
+      <Bats />
 
-      {/* Custom Fog foregound */}
-      <mesh position={(0, 0, 0)}>
+      {/* Custom Fog */}
+      <mesh>
         <planeGeometry args={[width, height]} />
         <shaderMaterial
           ref={fogMaterialRef}
@@ -181,20 +174,17 @@ export default function Background() {
         position={[-3, -2, 3]}
         object={treeClone}
         scale={[1.5, 1.5, 1.5]}
-        rotation={[0, 0, 0]}
       />
       <primitive
         ref={backgroundTreeRef}
         position={[17, -4, -18]}
         object={secondTreeClone}
-        scale={[3, 3, 3]}
-        rotation={[0, 0, 0]}
+        scale={[5, 5, 5]}
       />
       <primitive
         position={[30, -6, -25]}
         object={houseClone}
-        scale={[4, 4, 4]}
-        rotation={[0, -0.5, 0]}
+        scale={[3.5, 3.5, 3.5]}
       />
     </>
   )

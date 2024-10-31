@@ -4,7 +4,9 @@ const MatchedElementsContext = createContext()
 
 export const MatchedElementsProvider = ({ children }) => {
   const [matchedElements, setMatchedElements] = useState([])
-  const [audioTriggered, setAudioTriggered] = useState(false)
+  const [userHasWon, setUserHasWon] = useState(false)
+
+  const [resetGame, setResetGame] = useState(false)
 
   const addMatchedElement = (element) => {
     setMatchedElements((prev) => {
@@ -15,23 +17,16 @@ export const MatchedElementsProvider = ({ children }) => {
     })
   }
 
-  useEffect(() => {
-    const handleClick = () => {
-      setAudioTriggered(true)
-    }
-
-    document.addEventListener('click', handleClick)
-
-    return () => document.removeEventListener('click', handleClick)
-  }, [audioTriggered])
-
   return (
     <MatchedElementsContext.Provider
       value={{
         matchedElements,
+        setMatchedElements,
         addMatchedElement,
-        audioTriggered,
-        setAudioTriggered,
+        userHasWon,
+        setUserHasWon,
+        resetGame,
+        setResetGame,
       }}
     >
       {children}

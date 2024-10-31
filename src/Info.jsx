@@ -1,7 +1,7 @@
 const Info = () => {
   return (
     <footer>
-      <div className="wrapper">
+      <div className="wrapper-footer">
         <div className="container">
           <div className="about">
             Experience made for Three.js Journey Halloween 2024 challenge

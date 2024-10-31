@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
+:root {
+  --cursor-pointer: url('./UI/cursor-pointer.png'), auto;
+  --cursor-auto: url('./UI/cursor-auto.png'), auto;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -191,7 +196,7 @@ footer {
   pointer-events: none;
 }
 
-.wrapper {
+footer .wrapper-footer {
   width: 100%;
   height: 100%;
   padding: 2rem;
@@ -199,7 +204,7 @@ footer {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  align-items: flex-end;
+  align-items: center;
   font-size: 0.7rem;
   text-transform: uppercase;
 }

@@ -10,10 +10,8 @@ import {
 import { MatchedElementsProvider } from './Experience/MatchedElementsContext.jsx'
 import Experience from './Experience/Experience.jsx'
 import Loader from './Loader.jsx'
-import { Html, PositionalAudio, useProgress } from '@react-three/drei'
-import { AudioProvider, useAudio } from './AudioContext.jsx'
+import { AudioProvider } from './AudioContext.jsx'
 import Intro from './Intro.jsx'
-import Background from './Experience/background/Background.jsx'
 import Info from './Info.jsx'
 
 function App() {
@@ -30,7 +28,7 @@ function App() {
         <Suspense fallback={<Loader setIsLoaded={setIsLoaded} />}>
           <AudioProvider>
             <MatchedElementsProvider>
-              <Experience />
+              <Experience userClicked={userClicked} />
               <Intro
                 isLoaded={isLoaded}
                 userClicked={userClicked}

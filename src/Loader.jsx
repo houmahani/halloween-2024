@@ -1,5 +1,5 @@
+import { useEffect } from 'react'
 import { Html, useProgress } from '@react-three/drei'
-import { useState, useEffect } from 'react'
 
 const Loader = ({ setIsLoaded }) => {
   const { progress } = useProgress()

@@ -60,10 +60,10 @@ const SkullCandleScene = ({ matchedElements }) => {
 
       {/* Lights */}
       <ambientLight intensity={1} />
-      <directionalLight position={[10, 10, -5]} intensity={1} castShadow />
+      <directionalLight position={[10, 10, -5]} intensity={1} />
 
       {/* Background */}
-      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]} receiveShadow>
+      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]}>
         <planeGeometry args={[10, 10]} />
         <meshBasicMaterial color={'#ca0a13'} side={BackSide} />
       </mesh>

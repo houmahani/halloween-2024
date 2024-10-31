@@ -5,8 +5,8 @@ const Intro = ({ isLoaded, userClicked, handleUserClick }) => {
   const { enableAudio } = useAudio()
 
   const handleEnterClick = () => {
-    enableAudio() // Enable audio in context
-    handleUserClick() // Trigger user entry
+    enableAudio()
+    handleUserClick()
   }
 
   return (

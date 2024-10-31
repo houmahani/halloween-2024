@@ -49,15 +49,16 @@ const PumpkinScene = ({ matchedElements }) => {
 
   return (
     <group>
-      {matchedElements.includes('candle') && (
+      {matchedElements.includes('pumpkin') && (
         <PositionalAudio
           autoplay
           loop={false}
-          url="/sounds/candle-lighting.mp3"
+          url="/sounds/whoosh-dark.mp3"
           distance={0.8}
         />
       )}
       {/* Lights */}
+      <ambientLight intensity={1} />
       <directionalLight
         position={[0, 0, -5]}
         color={'#ffbf00'}
@@ -66,7 +67,7 @@ const PumpkinScene = ({ matchedElements }) => {
       />
 
       {/* Background */}
-      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]} receiveShadow>
+      <mesh rotation={[0, 0, -5]} position={[0, -1, 0]}>
         <planeGeometry args={[10, 10]} />
         <meshBasicMaterial color={'black'} side={BackSide} />
       </mesh>
