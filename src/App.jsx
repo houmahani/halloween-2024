@@ -9,7 +9,7 @@ import {
 } from '@react-three/postprocessing'
 import { AudioProvider } from '@/contexts/AudioContext.jsx'
 import { MemoryGameContextProvider } from '@/contexts/MemoryGameContext.jsx'
-import Experience from '@/components/Experience/Experience.jsx'
+import Experience from '@/components/experience/Experience.jsx'
 import Loader from '@/components/Loader.jsx'
 import Intro from '@/components/Intro.jsx'
 import Footer from '@/components/Footer.jsx'
