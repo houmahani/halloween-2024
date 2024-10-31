@@ -80,7 +80,7 @@ button {
   overflow: hidden;
   animation: hintGlow 3s infinite ease-in-out; /* Subtle glowing effect */
   z-index: 99;
-  pointer-events: inherit;
+  pointer-events: all;
   cursor: var(--cursor-pointer) !important;
 }
 
@@ -124,4 +124,5 @@ canvas {
   padding-bottom: 2.5rem;
   user-select: none !important;
   transform: none !important;
+  pointer-events: none;
 }
